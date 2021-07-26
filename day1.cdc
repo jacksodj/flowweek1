@@ -76,6 +76,26 @@ pub fun display(canvas: Canvas) {
   }
   log(stringify(array: headfoot))
 }
+pub resource Printer {
+  priv var printLog:{String:Int}
+  priv var printCount:UInt8
+
+  pub fun print(canvas: Canvas): @Picture? {
+    self.printCount = self.printCount + 1
+    if(self.printLog.containsKey(canvas.pixels)){  
+      display(canvas: canvas)
+      return nil
+    } else {
+      self.printLog[canvas.pixels] = 1
+      return <- create Picture(canvas: canvas)
+    }
+  }
+
+  init() {
+    self.printLog = {}
+    self.printCount = 0
+  }
+}
 
 pub fun main() {
   let pixelsX = [
@@ -91,11 +111,21 @@ pub fun main() {
     pixels: serializeStringArray(pixelsX)
   )
   let letterX <- create Picture(canvas: canvasX)
+  let printer <- create Printer()
+
   log(letterX.canvas)
 
   log("printing framed canvas")
   display(canvas: letterX.canvas)
   
+  log("Trying to print duplicates through the printer resource")
+  
+  let pictureX <- printer.print(canvas: letterX.canvas)
+  let pictureX2 <- printer.print(canvas: letterX.canvas)
+  
+  destroy pictureX
+  destroy pictureX2
+  destroy printer
   destroy letterX
 }
 // {"mode":"full","isActive":false}
